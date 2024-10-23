@@ -3,8 +3,6 @@
 # Author     : QIN2DIM
 # GitHub     : https://github.com/QIN2DIM
 # Description:
-from __future__ import annotations
-
 import inspect
 import sys
 from typing import Dict, Any
@@ -14,7 +12,14 @@ from loguru import logger
 
 def init_log(**sink_channel):
     event_logger_format = "<g>{time:YYYY-MM-DD HH:mm:ss}</g> | <lvl>{level}</lvl> - {message}"
-    serialize_format = event_logger_format + "- {extra}"
+    persistent_format = (
+        "<g>{time:YYYY-MM-DD HH:mm:ss}</g> | "
+        "<lvl>{level}</lvl>    | "
+        "<c><u>{name}</u></c>:{function}:{line} | "
+        "{message} - "
+        "{extra}"
+    )
+    serialize_format = event_logger_format + " - {extra}"
     logger.remove()
     logger.add(
         sink=sys.stdout, colorize=True, level="DEBUG", format=serialize_format, diagnose=False
@@ -26,7 +31,7 @@ def init_log(**sink_channel):
             rotation="1 week",
             encoding="utf8",
             diagnose=False,
-            format=serialize_format,
+            format=persistent_format,
         )
     if sink_channel.get("runtime"):
         logger.add(
@@ -36,13 +41,13 @@ def init_log(**sink_channel):
             retention="20 days",
             encoding="utf8",
             diagnose=False,
-            format=serialize_format,
+            format=persistent_format,
         )
     if sink_channel.get("serialize"):
         logger.add(
             sink=sink_channel.get("serialize"),
             level="DEBUG",
-            format=serialize_format,
+            format=persistent_format,
             encoding="utf8",
             diagnose=False,
             serialize=True,
